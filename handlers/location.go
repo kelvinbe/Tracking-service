@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"time"
 	"tracking-service/dto"
 
 	"tracking-service/utils"
@@ -42,9 +43,10 @@ func LocationWebhookHandler (app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 		"reservations.status": "ACTIVE",
 	}, bson.M{
 		"$push": bson.M{
-			"reservations.locations": bson.M{
+			"reservations.$.locations": bson.M{
 				"lat": lat,
 				"lon": lon,
+				"time": time.Now().UTC(),
 			},
 		},
 	}).Err()

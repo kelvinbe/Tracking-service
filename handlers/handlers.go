@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"net/http"
 	"tracking-service/aft"
 
 	"github.com/gofiber/fiber/v2"
@@ -33,6 +34,21 @@ var APIHandlers []APIHandler = []APIHandler{
 	{
 		Route:   "/ping",
 		Handler: Ping,
-		Method:  "GET",
+		Method:  http.MethodGet,
+	},
+	{
+		Route:   "/activate",
+		Handler: ActivateHandler,
+		Method: http.MethodPost, 
+	},
+	{
+		Route: "/deactivate",
+		Handler: DeactivateHandler,
+		Method: http.MethodPost,
+	},
+	{
+		Route: "/webhook/location",
+		Handler: LocationWebhookHandler,
+		Method: http.MethodPost,
 	},
 }

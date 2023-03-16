@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"tracking-service/dto"
@@ -10,16 +11,27 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func DeactivateDevice(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
+func DeactivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 
-	var inactive_reservations []dto.FetchedReservation
+	var inactive_reservations *[]dto.FetchedReservation
 	var results *string
 	err := app_clients.Postgres.Raw(`
-		select res.id as reservation_id, veh.id as vehicle_id, veh.tracking_device_id as tracking_device_id  from Reservation as res
-		inner join Vehicle as veh on res.vehicle_id = veh.id
-		where status in('CANCELLED', 'COMPLETE')
-		and type != 'BLOCK'
+		select json_agg(json_build_object(
+			'reservation_id', res.id,
+			'vehicle_id', veh.id,
+			'tracking_device_id', veh.tracking_device_id
+		)) as result from "public"."Reservation" as res
+		inner join "public"."Vehicle" as veh on res.vehicle_id = veh.id
+		where res.status in('CANCELLED', 'COMPLETE')
+		and type != 'BLOCK';
 	`).Scan(&results).Error
+
+	if results == nil {
+		return ctx.Status(http.StatusNotFound).JSON(&fiber.Map{
+			"message": "No reservation to deactivate",
+			"status":  "error",
+		})
+	}
 
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
@@ -38,12 +50,12 @@ func DeactivateDevice(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 	}
 
 	var loop_errors []error
-	for _, inactive_reservation := range inactive_reservations {
+	for _, inactive_reservation := range *inactive_reservations {
 		var reservation = inactive_reservation
 
 		// get the tracking device
 		var trackingDevice dto.TrackingDevice
-		err := app_clients.Mongo.Collection("tracking").FindOne(*app_clients.MongoContext, bson.M{
+		err := app_clients.Mongo.Collection("tracking").FindOne(context.TODO(), bson.M{
 			"tracking_device_id": reservation.TrackingDeviceId,
 		}).Decode(&trackingDevice)
 
@@ -65,7 +77,7 @@ func DeactivateDevice(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 			}
 
 			// update the tracking device status
-			_, err = app_clients.Mongo.Collection("tracking").UpdateOne(*app_clients.MongoContext, bson.M{
+			_, err = app_clients.Mongo.Collection("tracking").UpdateOne(context.TODO(), bson.M{
 				"tracking_device_id": trackingDevice.TrackingDeviceId,
 			}, bson.M{
 				"$set": bson.M{
@@ -79,7 +91,7 @@ func DeactivateDevice(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 			})
 
 			if found {
-				_, err = app_clients.Mongo.Collection("tracking").UpdateOne(*app_clients.MongoContext, bson.M{
+				_, err = app_clients.Mongo.Collection("tracking").UpdateOne(context.TODO(), bson.M{
 					"tracking_device_id": trackingDevice.TrackingDeviceId,
 					"reservations.reservation_id": the_active_reservation.ReservationId,
 				}, bson.M{

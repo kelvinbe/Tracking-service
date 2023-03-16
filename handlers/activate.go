@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"tracking-service/dto"
 
@@ -13,16 +14,29 @@ import (
 
 func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 
-	var activeReservations []dto.FetchedReservation
+	var activeReservations *[]dto.FetchedReservation
 	var result *string
 
 	err := app_clients.Postgres.Raw(`
-		select res.id as reservation_id, veh.id as vehicle_id, veh.tracking_device_id as tracking_device_id from Reservation as res 
-		inner join Vehicle as veh on res.vehicle_id = veh.id
-		where status in('ACTIVE')
-		and type != 'BLOCK'
-		and veh.tracking_device_id is not null
+		select json_agg(json_build_object(
+			'reservation_id', res.id,
+			'vehicle_id', veh.id,
+			'tracking_device_id', veh.tracking_device_id
+		)) as result from "public"."Reservation" as res 
+		inner join "public"."Vehicle" as veh on res.vehicle_id = veh.id
+		where res.status in('ACTIVE')
+		and res.type != 'BLOCK'
+		and veh.tracking_device_id is not null;
 	`).Scan(&result).Error
+
+	log.Printf("result: %v", *result)
+
+	if result == nil {
+		return ctx.Status(http.StatusNotFound).JSON(&fiber.Map{
+			"message": "No reservation to activate",
+			"status":  "error",
+		})
+	}
 
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
@@ -33,18 +47,22 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 
 	err = json.Unmarshal([]byte(*result), &activeReservations)
 
+	log.Printf("activeReservations: %v", *activeReservations)
+
 	if err != nil {
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
 			"message": "Error while parsing active reservations",
 			"status":  "error",
+			"error": err,
 		})
 	}
 
 	var loop_errors []error
-	for _, activeReservation := range activeReservations {
+	for _, activeReservation := range *activeReservations {
+		log.Printf("activeReservation: %v", activeReservation)
 		var reservation = activeReservation
-		var trackingDevice dto.TrackingDevice
-		err := app_clients.Mongo.Collection("tracking").FindOne(*app_clients.MongoContext, bson.M{
+		var trackingDevice *dto.TrackingDevice
+		err := app_clients.Mongo.Collection("tracking").FindOne(context.TODO(), bson.M{
 			"tracking_device_id": reservation.TrackingDeviceId,
 		}).Decode(&trackingDevice)
 
@@ -67,9 +85,11 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 				var newReservation = dto.MongoReservation{
 					ReservationId: reservation.ReservationId.String(),
 					Locations:     []dto.Location{},
-					Status: "INACTIVE",
+					Status:        "INACTIVE",
 				}
-				_, err = app_clients.Mongo.Collection("tracking").UpdateOne(*app_clients.MongoContext, bson.M{
+
+				log.Printf("Here is the new reservation %v", newReservation)
+				_, err = app_clients.Mongo.Collection("tracking").UpdateOne(context.TODO(), bson.M{
 					"tracking_device_id": reservation.TrackingDeviceId,
 				}, bson.M{
 					"$push": bson.M{
@@ -81,6 +101,7 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 					loop_errors = append(loop_errors, err)
 					continue
 				}
+				log.Printf("No issue adding the new reservation")
 			} else {
 				loop_errors = append(loop_errors, err)
 				continue
@@ -108,7 +129,7 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 			}
 
 			//device is now active, update the status in the database
-			_, err = app_clients.Mongo.Collection("tracking").UpdateOne(*app_clients.MongoContext, bson.M{
+			_, err = app_clients.Mongo.Collection("tracking").UpdateOne(context.TODO(), bson.M{
 				"tracking_device_id": reservation.TrackingDeviceId,
 			}, bson.M{
 				"$set": bson.M{
@@ -122,8 +143,8 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 			}
 
 			// also update the status of the reservation
-			_, err = app_clients.Mongo.Collection("tracking").UpdateOne(*app_clients.MongoContext, bson.M{
-				"tracking_device_id": reservation.TrackingDeviceId,
+			_, err = app_clients.Mongo.Collection("tracking").UpdateOne(context.TODO(), bson.M{
+				"tracking_device_id":          reservation.TrackingDeviceId,
 				"reservations.reservation_id": reservation.ReservationId.String(),
 			}, bson.M{
 				"$set": bson.M{

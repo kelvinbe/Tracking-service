@@ -38,3 +38,19 @@ type IncomingMessage struct {
 	To          string `json:"to"`
 	NetworkCode string `json:"networkCode"`
 }
+
+type Recipient struct {
+	StatusCode int `json:"statusCode"`
+	Number	 string `json:"number"`
+	Cost string `json:"cost"`
+	MessageId string `json:"messageId"`
+}
+
+type SMSMessageData struct {
+	Message *string `json:"message"`
+	Recepients []Recipient `json:"Recipients"`
+}
+
+type OutgoingMessageResp struct {
+	SMSMessageData SMSMessageData `json:"SMSMessageData"`
+}

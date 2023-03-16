@@ -52,7 +52,7 @@ func NewMonongoClient() (*mongo.Client, error) {
 
 // this is for instantiating a postgres client
 func NewPostgressClient(config PostgressConfig) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", config.Host, config.Username, config.Password, config.Database, config.Port, config.SSLMode)
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", config.Host, config.Username, config.Password, config.Database, config.Port)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
