@@ -43,7 +43,7 @@ func (aft *AftClient) ActivateDevice(device_id string) error {
 
 	data := url.Values{}
 	data.Set("from", aft.ShortCode)
-	data.Set("to", "+254794699065")
+	data.Set("to", device_id)
 	data.Set("message", utils.ACTIVATION_CODE)
 	data.Set("username", aft.Username)
 
@@ -93,7 +93,7 @@ func (aft *AftClient) DeactivateDevice(device_id string) error {
 	data := url.Values{}
 
 	data.Set("from", aft.ShortCode)
-	data.Set("to", "+254794699065")
+	data.Set("to", device_id)
 	data.Set("message", utils.DEACTIVATION_CODE)
 	data.Set("username", aft.Username)
 
