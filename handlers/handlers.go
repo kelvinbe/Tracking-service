@@ -51,4 +51,9 @@ var APIHandlers []APIHandler = []APIHandler{
 		Handler: LocationWebhookHandler,
 		Method: http.MethodPost,
 	},
+	{
+		Route: "/polling",
+		Handler: PollingHandler,
+		Method: http.MethodGet,
+	},
 }

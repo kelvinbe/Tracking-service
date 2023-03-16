@@ -8,6 +8,7 @@ import (
 	"tracking-service/dto"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -28,8 +29,6 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 		and res.type != 'BLOCK'
 		and veh.tracking_device_id is not null;
 	`).Scan(&result).Error
-
-	log.Printf("result: %v", *result)
 
 	if result == nil {
 		return ctx.Status(http.StatusNotFound).JSON(&fiber.Map{
@@ -120,6 +119,32 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 
 		// if the tracking device is inactive, activate it
 		if trackingDevice.Status == "INACTIVE" {
+
+			_, found := lo.Find(trackingDevice.Reservations, func(_reservation dto.MongoReservation) bool {
+				return _reservation.ReservationId == reservation.ReservationId.String()
+			})
+
+			if !found {
+				var newReservation = dto.MongoReservation{
+					ReservationId: reservation.ReservationId.String(),
+					Locations:     []dto.Location{},
+					Status:        "INACTIVE",
+				}
+
+				_, err = app_clients.Mongo.Collection("tracking").UpdateOne(context.TODO(), bson.M{
+					"tracking_device_id": reservation.TrackingDeviceId,
+				}, bson.M{
+					"$push": bson.M{
+						"reservations": newReservation,
+					},
+				})
+
+				if err != nil {
+					loop_errors = append(loop_errors, err)
+					continue
+				}
+			}
+
 			// activate the tracking device
 			err = app_clients.Aft.ActivateDevice(trackingDevice.TrackingDeviceId)
 

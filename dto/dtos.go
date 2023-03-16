@@ -1,6 +1,10 @@
 package dto
 
-import uuid "github.com/satori/go.uuid"
+import (
+	"time"
+
+	uuid "github.com/satori/go.uuid"
+)
 
 // these are data transfer objects, this file is mostly for defining the data structures that are used in the handlers
 
@@ -11,9 +15,9 @@ type FetchedReservation struct {
 }
 
 type Location struct {
-	Latitude  float64 `bson:"latitude"`
-	Longitude float64 `bson:"longitude"`
-	TimeStamp int64   `bson:"timestamp"` // not sure about the timestamp format, will make necessary modifications once sure
+	Latitude  string `bson:"lat"`
+	Longitude string `bson:"lon"`
+	TimeStamp time.Time   `bson:"time"` // not sure about the timestamp format, will make necessary modifications once sure
 }
 
 type MongoReservation struct {
