@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"time"
 
 	"tracking-service/dto"
 
@@ -36,8 +37,16 @@ func PollingHandler (app_client *APP_CLIENTS, ctx *fiber.Ctx) error {
 				},
 			},
 		},
+		"reservations.locations": bson.M{
+			"$elemMatch": bson.M{
+				"time": bson.M{
+					"$gt": time.Now().UTC().Add(-time.Minute * 5),
+				},
+			},
+		},
 	}, options.FindOne().SetProjection(bson.M{
 		"reservations.$": 1,
+		
 		
 	})).Decode(&locations)
 
