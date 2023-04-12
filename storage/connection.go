@@ -3,21 +3,31 @@ package storage
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
-	"time"
 
 	lo "github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
+type PostgressConfig struct {
+	Host     string
+	Port     string
+	Username string
+	Password string
+	Database string
+	SSLMode  string
+}
+
 type Connection struct {
-	Client *mongo.Client
+	Client  *mongo.Client
 	Context *context.Context
 }
 
-
-func NewClient () (*Connection, error) {
+func NewMonongoClient() (*mongo.Client, error) {
 
 	connection_string := os.Getenv("MONGO_CONNECTION_STRING")
 
@@ -27,22 +37,28 @@ func NewClient () (*Connection, error) {
 
 	client, err := mongo.NewClient(options.Client().ApplyURI(connection_string))
 
-    if err != nil {
-        return nil, err
-    }
-
-	ctx, _ := context.WithTimeout(context.Background(), 100 * time.Second)
-
 	if err != nil {
 		return nil, err
 	}
 
 
-	return &Connection{
-		Client: client,
-		Context: &ctx,
-	} , nil;
-	
+	if err != nil {
+		return nil, err
+	}
 
+	return client, nil
 
+}
+
+// this is for instantiating a postgres client
+func NewPostgressClient(config PostgressConfig) (*gorm.DB, error) {
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s", config.Host, config.Username, config.Password, config.Database, config.Port)
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }

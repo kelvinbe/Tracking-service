@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"tracking-service/repository"
 	"tracking-service/utils"
@@ -14,7 +15,7 @@ func main() {
 	// this will initialize the repository and load the database connection into it
 	repo := repository.InitRepository()
 	// close the connection when main exits
-	defer repo.Client.Disconnect(*repo.Context)
+	defer repo.Client.Disconnect(context.Background())
 
 	// create a new fiber app
 	app := fiber.New()
