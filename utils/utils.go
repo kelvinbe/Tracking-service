@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -10,6 +11,15 @@ import (
 
 func LoadEnv() {
 	env := os.Getenv("GO_ENV")
+	fmt.Printf("GO_ENV: %s", env)
+	fmt.Println("Other env variables:::")
+	fmt.Println(os.Getenv("DB_HOST"))
+	fmt.Println(os.Getenv("DB_PORT"))
+	fmt.Println(os.Getenv("DB_USERNAME"))
+	fmt.Println(os.Getenv("DB_PASSWORD"))
+	fmt.Println(os.Getenv("DB_NAME"))
+	fmt.Println(os.Getenv("DB_SSLMODE"))
+	
 	if env == "" {
 		err := godotenv.Load(".env")
 		if err != nil {
