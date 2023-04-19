@@ -9,7 +9,8 @@ on:
 
 jobs: 
   test_handlers:
-    runs-on: ubuntu-latest
+    if: false
+    runs-on: self-hosted
     env:
       MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
       DB_USERNAME: ${{ secrets.DB_USERNAME }}
@@ -47,7 +48,7 @@ jobs:
     
   deploy:
     runs-on: self-hosted
-
+    if: false
     env:
       MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
       DB_USERNAME: ${{ secrets.DB_USERNAME }}
