@@ -1,0 +1,74 @@
+name: Divvly Tracking Service
+
+on:
+  push: 
+    branches: [main, WAK-Sprint-2023-14, WAK-Sprint-2023-15, WAK-Sprint-2023-16] #sprint release branches have been included
+
+  pull_request:
+    branches: [main, WAK-Sprint-2023-14, WAK-Sprint-2023-15, WAK-Sprint-2023-16] #sprint release branches have been included
+
+jobs: 
+  test_handlers:
+    runs-on: ubuntu-latest
+    env:
+      MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_SSLMODE: ${{ secrets.DB_SSLMODE }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      AFICAS_TALKING_API_KEY: ${{ secrets.AFICAS_TALKING_API_KEY }}
+      AFICAS_TALKING_USERNAME: ${{ secrets.AFICAS_TALKING_USERNAME }}
+      AFICAS_TALKING_SHORT_CODE: ${{ secrets.AFICAS_TALKING_SHORT_CODE }}
+      GO_ENV: ${{ secrets.GO_ENV }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.20.2
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Build code
+        run: go build -o divvly-tracking-service
+
+      - name: Run server
+        run: ./divvly-tracking-service & sleep 10
+
+      - name: Run tests
+        run: go test -v -timeout 300s ./tests
+
+    
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_SSLMODE: ${{ secrets.DB_SSLMODE }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      AFICAS_TALKING_API_KEY: ${{ secrets.AFICAS_TALKING_API_KEY }}
+      AFICAS_TALKING_USERNAME: ${{ secrets.AFICAS_TALKING_USERNAME }}
+      AFICAS_TALKING_SHORT_CODE: ${{ secrets.AFICAS_TALKING_SHORT_CODE }}
+      GO_ENV: ${{ secrets.GO_ENV }}
+
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build the docker image
+        run: docker build -t divvly-tracking-service .
+
+      - name: Start the docker container
+        run: docker run -d -p 8080:80 divvly-tracking-service
+
