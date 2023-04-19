@@ -46,7 +46,7 @@ jobs:
 
     
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     env:
       MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
