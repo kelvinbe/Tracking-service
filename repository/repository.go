@@ -56,6 +56,22 @@ func InitRepository() *Repository {
 		log.Fatalf("Error initializing AFT client: %s", err.Error())
 	}
 
+	if db == nil {
+		log.Fatalf("Error connecting to mongo database: %s", err.Error())
+	}
+
+	if client == nil {
+		log.Fatalf("Error connecting to mongo database: %s", err.Error())
+	}
+
+	if postgres == nil {
+		log.Fatalf("Error connecting to postgres database: %s", err.Error())
+	}
+
+	if aft_client == nil {
+		log.Fatalf("Error initializing AFT client: %s", err.Error())
+	}
+
 	return &Repository{
 		Client:   client,
 		Mongo:    db,
