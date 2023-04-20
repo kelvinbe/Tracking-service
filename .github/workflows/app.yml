@@ -9,7 +9,7 @@ on:
 
 jobs: 
   test_handlers:
-    if: false
+    if: true
     runs-on: self-hosted
     env:
       MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
