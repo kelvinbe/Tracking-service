@@ -67,6 +67,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Stop the docker container
+        run: docker stop $(docker ps -a -q)
+
+      - name: Remove the docker container
+        run: docker rm $(docker ps -a -q)
+
+      - name: Remove the docker image
+        run: docker rmi $(docker images -q)
+
       - name: Build the docker image
         run: docker build -t divvly-tracking-service .
 
