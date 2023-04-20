@@ -19,9 +19,9 @@ jobs:
       DB_PORT: ${{ secrets.DB_PORT }}
       DB_SSLMODE: ${{ secrets.DB_SSLMODE }}
       DB_HOST: ${{ secrets.DB_HOST }}
-      AFICAS_TALKING_API_KEY: ${{ secrets.AFICAS_TALKING_API_KEY }}
-      AFICAS_TALKING_USERNAME: ${{ secrets.AFICAS_TALKING_USERNAME }}
-      AFICAS_TALKING_SHORT_CODE: ${{ secrets.AFICAS_TALKING_SHORT_CODE }}
+      AFRICAS_TALKING_API_KEY: ${{ secrets.AFRICAS_TALKING_API_KEY }}
+      AFRICAS_TALKING_USERNAME: ${{ secrets.AFRICAS_TALKING_USERNAME }}
+      AFRICAS_TALKING_SHORT_CODE: ${{ secrets.AFRICAS_TALKING_SHORT_CODE }}
       GO_ENV: ${{ secrets.GO_ENV }}
 
     steps:
@@ -57,9 +57,9 @@ jobs:
       DB_PORT: ${{ secrets.DB_PORT }}
       DB_SSLMODE: ${{ secrets.DB_SSLMODE }}
       DB_HOST: ${{ secrets.DB_HOST }}
-      AFICAS_TALKING_API_KEY: ${{ secrets.AFICAS_TALKING_API_KEY }}
-      AFICAS_TALKING_USERNAME: ${{ secrets.AFICAS_TALKING_USERNAME }}
-      AFICAS_TALKING_SHORT_CODE: ${{ secrets.AFICAS_TALKING_SHORT_CODE }}
+      AFRICAS_TALKING_API_KEY: ${{ secrets.AFRICAS_TALKING_API_KEY }}
+      AFRICAS_TALKING_USERNAME: ${{ secrets.AFRICAS_TALKING_USERNAME }}
+      AFRICAS_TALKING_SHORT_CODE: ${{ secrets.AFRICAS_TALKING_SHORT_CODE }}
       GO_ENV: ${{ secrets.GO_ENV }}
 
 
