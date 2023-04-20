@@ -48,7 +48,7 @@ jobs:
     
   deploy:
     runs-on: self-hosted
-    if: false
+    if: true
     env:
       MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
       DB_USERNAME: ${{ secrets.DB_USERNAME }}
