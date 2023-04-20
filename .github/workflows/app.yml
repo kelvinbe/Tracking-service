@@ -67,17 +67,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Stop the docker container
-        run: docker stop $(docker ps -a -q)
-
-      - name: Remove the docker container
-        run: docker rm $(docker ps -a -q)
-
-      - name: Remove the docker image
-        run: docker rmi $(docker images -q)
+      - name: Clean up docker
+        run: sudo bash ./scripts/docker_cleanup.sh
 
       - name: Build the docker image
-        run: docker build -t divvly-tracking-service .
+        run: docker build \
+          --build-arg MONGO_CONNECTION_STRING=${{ secrets.MONGO_CONNECTION_STRING }} \
+          --build-arg DB_USERNAME=${{ secrets.DB_USERNAME }} \
+          --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+          --build-arg DB_NAME=${{ secrets.DB_NAME }} \
+          --build-arg DB_PORT=${{ secrets.DB_PORT }} \
+          --build-arg DB_SSLMODE=${{ secrets.DB_SSLMODE }} \
+          --build-arg DB_HOST=${{ secrets.DB_HOST }} \
+          --build-arg AFRICAS_TALKING_API_KEY=${{ secrets.AFRICAS_TALKING_API_KEY }} \
+          --build-arg AFRICAS_TALKING_USERNAME=${{ secrets.AFRICAS_TALKING_USERNAME }} \
+          --build-arg AFRICAS_TALKING_SHORT_CODE=${{ secrets.AFRICAS_TALKING_SHORT_CODE }} \
+          --build-arg GO_ENV=${{ secrets.GO_ENV }} \
+          -t divvly-tracking-service .
 
       - name: Start the docker container
         run: docker run -d -p 8080:80 divvly-tracking-service

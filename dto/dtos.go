@@ -15,9 +15,9 @@ type FetchedReservation struct {
 }
 
 type Location struct {
-	Latitude  string `bson:"lat"`
-	Longitude string `bson:"lon"`
-	TimeStamp time.Time   `bson:"time"` // not sure about the timestamp format, will make necessary modifications once sure
+	Latitude  string    `bson:"lat"`
+	Longitude string    `bson:"lon"`
+	TimeStamp time.Time `bson:"time"` // not sure about the timestamp format, will make necessary modifications once sure
 }
 
 type MongoReservation struct {
@@ -44,17 +44,39 @@ type IncomingMessage struct {
 }
 
 type Recipient struct {
-	StatusCode int `json:"statusCode"`
-	Number	 string `json:"number"`
-	Cost string `json:"cost"`
-	MessageId string `json:"messageId"`
+	StatusCode int    `json:"statusCode"`
+	Number     string `json:"number"`
+	Cost       string `json:"cost"`
+	MessageId  string `json:"messageId"`
 }
 
 type SMSMessageData struct {
-	Message *string `json:"message"`
+	Message    *string     `json:"message"`
 	Recepients []Recipient `json:"Recipients"`
 }
 
 type OutgoingMessageResp struct {
 	SMSMessageData SMSMessageData `json:"SMSMessageData"`
 }
+
+type IncomingUserLocationInfo struct {
+	VehicleId     string `json:"vehicle_id"`
+	Longitude     string `json:"longitude"`
+	Latitude      string `json:"latitude"`
+	ReservationId string `json:"reservation_id"`
+}
+
+type IncomingVehicleLocationInfo struct {
+	VehicleId string `json:"vehicle_id"`
+}
+
+type UserLocation struct {
+	ReservationId string    `bson:"reservation_id" json:"reservation_id"`
+	Latitude      string    `bson:"latitude" json:"latitude"`
+	Longitude     string    `bson:"longitude" json:"longitude"`
+	Timestamp     time.Time `bson:"timestamp" json:"timestamp"`
+	VehicleId     string    `bson:"vehicle_id" json:"vehicle_id"` 
+}
+
+
+
