@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"time"
 
@@ -10,6 +9,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -51,7 +51,13 @@ func PollingHandler (app_client *APP_CLIENTS, ctx *fiber.Ctx) error {
 	})).Decode(&locations)
 
 	if err != nil {
-		log.Print(err)
+
+		if (err == mongo.ErrNoDocuments) {
+			return ctx.Status(http.StatusNotFound).JSON(&fiber.Map{
+				"message": "No locations found",
+				"status":  "error",
+			})
+		}
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
 			"message": "Error while fetching locations",
 			"status":  "error",
@@ -66,7 +72,7 @@ func PollingHandler (app_client *APP_CLIENTS, ctx *fiber.Ctx) error {
 		})
 	} 
 
-	if len(locations.Reservations[0].Locations) == 0 {
+	if len((locations.Reservations)[0].Locations) == 0 {
 		return ctx.Status(http.StatusNotFound).JSON(&fiber.Map{
 			"message": "No locations found",
 			"status":  "error",
@@ -76,6 +82,6 @@ func PollingHandler (app_client *APP_CLIENTS, ctx *fiber.Ctx) error {
 	return ctx.Status(http.StatusOK).JSON(&fiber.Map{
 		"message": "Locations fetched successfully",
 		"status":  "success",
-		"data":    locations.Reservations[0].Locations,
+		"data":    (locations.Reservations)[0].Locations,
 	})
 }

@@ -46,6 +46,13 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 
 	err = json.Unmarshal([]byte(*result), &activeReservations)
 
+	if activeReservations == nil {
+		return ctx.Status(http.StatusNotFound).JSON(&fiber.Map{
+			"message": "No reservation to activate",
+			"status":  "error",
+		})
+	}
+
 	log.Printf("activeReservations: %v", *activeReservations)
 
 	if err != nil {
