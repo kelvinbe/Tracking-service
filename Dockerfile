@@ -29,10 +29,12 @@ ARG GO_ENV
 ENV GO_ENV=${GO_ENV}
 
 
-COPY . ./app
+COPY . ./
 
 RUN go mod download 
 
 RUN go build -o main 
 
-CMD ["./app/main"]
+RUN ls -la
+
+CMD ["./main"]
