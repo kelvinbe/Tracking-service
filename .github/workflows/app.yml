@@ -2,10 +2,10 @@ name: Divvly Tracking Service
 
 on:
   push: 
-    branches: [main, WAK-Sprint-2023-14, WAK-Sprint-2023-15, WAK-Sprint-2023-16] #sprint release branches have been included
+    branches: [main, WAK-Sprint-2023-14, WAK-Sprint-2023-15, WAK-Sprint-2023-16, mobile-tracking] #sprint release branches have been included
 
   pull_request:
-    branches: [main, WAK-Sprint-2023-14, WAK-Sprint-2023-15, WAK-Sprint-2023-16] #sprint release branches have been included
+    branches: [main, WAK-Sprint-2023-14, WAK-Sprint-2023-15, WAK-Sprint-2023-16, mobile-tracking] #sprint release branches have been included
 
 jobs: 
   test_handlers:
