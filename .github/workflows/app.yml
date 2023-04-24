@@ -72,17 +72,17 @@ jobs:
 
       - name: Build the docker image
         run: docker buildx build -t divvly-tracking-service \
-          --build-arg MONGO_CONNECTION_STRING=${{ secrets.MONGO_CONNECTION_STRING }} \
-          --build-arg DB_USERNAME=${{ secrets.DB_USERNAME }} \
-          --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
-          --build-arg DB_NAME=${{ secrets.DB_NAME }} \
-          --build-arg DB_PORT=${{ secrets.DB_PORT }} \
-          --build-arg DB_SSLMODE=${{ secrets.DB_SSLMODE }} \
-          --build-arg DB_HOST=${{ secrets.DB_HOST }} \
-          --build-arg AFRICAS_TALKING_API_KEY=${{ secrets.AFRICAS_TALKING_API_KEY }} \
-          --build-arg AFRICAS_TALKING_USERNAME=${{ secrets.AFRICAS_TALKING_USERNAME }} \
-          --build-arg AFRICAS_TALKING_SHORT_CODE=${{ secrets.AFRICAS_TALKING_SHORT_CODE }} \
-          --build-arg GO_ENV=${{ secrets.GO_ENV }} \
+          --build-arg MONGO_CONNECTION_STRING=$MONGO_CONNECTION_STRING \
+          --build-arg DB_USERNAME=$DB_USERNAME \
+          --build-arg DB_PASSWORD=$secrets.DB_PASSWORD \
+          --build-arg DB_NAME=$DB_NAME \
+          --build-arg DB_PORT=$DB_PORT \
+          --build-arg DB_SSLMODE=$DB_SSLMODE \
+          --build-arg DB_HOST=$DB_HOST \
+          --build-arg AFRICAS_TALKING_API_KEY=$AFRICAS_TALKING_API_KEY \
+          --build-arg AFRICAS_TALKING_USERNAME=$AFRICAS_TALKING_USERNAME \
+          --build-arg AFRICAS_TALKING_SHORT_CODE=$AFRICAS_TALKING_SHORT_CODE \
+          --build-arg GO_ENV=$GO_ENV \
           .
 
       - name: Start the docker container
