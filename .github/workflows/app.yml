@@ -75,7 +75,7 @@ jobs:
           docker build -t divvly-tracking-service \
           --build-arg MONGO_CONNECTION_STRING=$MONGO_CONNECTION_STRING \
           --build-arg DB_USERNAME=$DB_USERNAME \
-          --build-arg DB_PASSWORD=$secrets.DB_PASSWORD \
+          --build-arg DB_PASSWORD=$DB_PASSWORD \
           --build-arg DB_NAME=$DB_NAME \
           --build-arg DB_PORT=$DB_PORT \
           --build-arg DB_SSLMODE=$DB_SSLMODE \
