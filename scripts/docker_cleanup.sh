@@ -3,6 +3,17 @@
 # Get the list of running container IDs
 container_ids=$(docker ps -q)
 
+# Get list of any stopped containers
+stopped_containers=$(docker ps -a -q)
+
+# Check if there are any stopped containers
+if [ -n "$stopped_containers" ]; then
+    echo "Removing stopped containers..."
+    docker rm $stopped_containers
+else
+    echo "No stopped containers found."
+fi
+
 # Check if there are any running containers
 if [ -n "$container_ids" ]; then
     echo "Stopping running containers..."
