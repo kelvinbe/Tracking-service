@@ -71,7 +71,7 @@ jobs:
         run: sudo bash ./scripts/docker_cleanup.sh
 
       - name: Build the docker image
-        run: docker build \
+        run: docker build -t divvly-tracking-service \
           --build-arg MONGO_CONNECTION_STRING=${{ secrets.MONGO_CONNECTION_STRING }} \
           --build-arg DB_USERNAME=${{ secrets.DB_USERNAME }} \
           --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
@@ -83,7 +83,7 @@ jobs:
           --build-arg AFRICAS_TALKING_USERNAME=${{ secrets.AFRICAS_TALKING_USERNAME }} \
           --build-arg AFRICAS_TALKING_SHORT_CODE=${{ secrets.AFRICAS_TALKING_SHORT_CODE }} \
           --build-arg GO_ENV=${{ secrets.GO_ENV }} \
-          -t divvly-tracking-service .
+          .
 
       - name: Start the docker container
         run: docker run -d -p 8080:80 divvly-tracking-service
