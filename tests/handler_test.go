@@ -1,17 +1,16 @@
 package tests
 
 import (
+	"context"
 	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"testing"
-
-	// "time"
 	"tracking-service/repository"
 	"tracking-service/utils"
 
-	"github.com/gofiber/fiber/v2"
+	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func TestActivateHandler(t *testing.T) {
@@ -59,11 +58,51 @@ func TestActivateHandler(t *testing.T) {
 }
 
 func TestPollingHandler(t *testing.T){
-	//setup 
 	utils.LoadEnv()
-	repo := repository.InitRepository() 
-	app := fiber.New()
-	repo.SetupRotes(app)
+	with_no_location := uuid.NewV4().String()
+
+	with_four_locations := uuid.NewV4().String()
+
+
+	// setup
+	repo := repository.InitRepository()
+
+	// add a tracking device with no location
+	_, err := repo.Mongo.Collection("tracking_devices").InsertOne(context.TODO(), bson.M{
+		"tracking_device_id": with_no_location,
+		"status": "ACTIVE",
+		"reservations": []bson.M{
+			{
+				"reservation_id": uuid.NewV4().String(),
+				"locations": []bson.M{},
+				"status": "ACTIVE",
+			},
+		},
+	}); if err != nil {
+		t.Errorf("An error occured while inserting tracking device: %v", err)
+	}
+
+	// and one with four locations
+	_, err = repo.Mongo.Collection("tracking_devices").InsertOne(context.TODO(), bson.M{
+		"tracking_device_id": with_four_locations,
+		"status": "ACTIVE",
+		"reservations": []bson.M{
+			{
+				"reservation_id": uuid.NewV4().String(),
+				"locations": []bson.M{
+				},
+				"status": "ACTIVE",
+			},
+		},
+	}); if err != nil {
+		t.Errorf("An error occured while inserting tracking device: %v", err)
+	}
+
+
+
+	if err != nil {
+		t.Errorf("An error occured while inserting tracking device: %v", err)
+	}
 
 	// tests
 	tests := []struct {
@@ -72,20 +111,45 @@ func TestPollingHandler(t *testing.T){
 		expectedCode int
 	}{
 		{
+			description: "Should return 404",
+			route: fmt.Sprintf("/api/polling?tracking_device_id=%s", with_no_location),
+			expectedCode: http.StatusNotFound,
+		},
+		{
 			description: "Should return 200",
-			route: "/api/polling?tracking_device_id=4438833",
+			route: fmt.Sprintf("/api/polling?tracking_device_id=%s", with_four_locations),
 			expectedCode: http.StatusNotFound,
 		},
 	}
 
 	for _, test := range tests {
-		req := httptest.NewRequest(http.MethodGet, test.route, nil)
 		
-		res, _ := app.Test(req)
+		url := fmt.Sprintf("http://0.0.0.0:8080%s", test.route)
+		client := &http.Client{}
+		req, err := http.NewRequest(http.MethodGet,url , nil)
+		if err != nil {
+			t.Error(err)
+		}
 
+		res, err := client.Do(req)
+
+		if err != nil {
+			t.Error(err)
+		}
 
 		assert.Equalf(t, test.expectedCode, res.StatusCode, test.description)
+		
 	}
+
+	// teardown
+	for _, tracking_device_id := range []string{with_no_location, with_four_locations} {
+		_, err := repo.Mongo.Collection("tracking_devices").DeleteOne(context.TODO(), bson.M{
+			"tracking_device_id": tracking_device_id,
+		}); if err != nil {
+			t.Errorf("An error occured while deleting tracking device: %v", err)
+		}
+	}
+
 }
 
 func TestDeactivateHandler(t *testing.T) {

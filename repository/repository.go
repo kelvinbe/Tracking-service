@@ -10,8 +10,11 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/websocket/v2"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
+
+	"tracking-service/websockets"
 )
 
 type Repository struct {
@@ -118,4 +121,23 @@ func (repo *Repository) SetupRotes(app *fiber.App) {
 		Postgres:     repo.Postgres,
 		Aft:          repo.Aft,
 	})
+
+	// websocket connections
+	app.Get("/userlocation", websocket.New(func (connection *websocket.Conn){
+		appwebsockets.UserLocationPublish(&appwebsockets.APP_CLIENTS{
+			Mongo: repo.Mongo,
+			Aft: repo.Aft,
+			Postgres: repo.Postgres,
+		}, connection)
+	}))
+
+
+	// vehicle location query
+	app.Get("/vehiclelocation", websocket.New(func (connection *websocket.Conn){
+		appwebsockets.VehicleLocationQuery(&appwebsockets.APP_CLIENTS{
+			Mongo: repo.Mongo,
+			Aft: repo.Aft,
+			Postgres: repo.Postgres,
+		}, connection)
+	}))
 }

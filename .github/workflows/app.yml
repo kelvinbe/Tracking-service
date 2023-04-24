@@ -2,10 +2,10 @@ name: Divvly Tracking Service
 
 on:
   push: 
-    branches: [main, WAK-Sprint-2023-14, WAK-Sprint-2023-15, WAK-Sprint-2023-16] #sprint release branches have been included
+    branches: [main, WAK-Sprint-2023-14, WAK-Sprint-2023-15, WAK-Sprint-2023-16, mobile-tracking] #sprint release branches have been included
 
   pull_request:
-    branches: [main, WAK-Sprint-2023-14, WAK-Sprint-2023-15, WAK-Sprint-2023-16] #sprint release branches have been included
+    branches: [main, WAK-Sprint-2023-14, WAK-Sprint-2023-15, WAK-Sprint-2023-16, mobile-tracking] #sprint release branches have been included
 
 jobs: 
   test_handlers:
@@ -67,17 +67,24 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Stop the docker container
-        run: docker stop $(docker ps -a -q)
-
-      - name: Remove the docker container
-        run: docker rm $(docker ps -a -q)
-
-      - name: Remove the docker image
-        run: docker rmi $(docker images -q)
+      - name: Clean up docker
+        run: sudo bash ./scripts/docker_cleanup.sh
 
       - name: Build the docker image
-        run: docker build -t divvly-tracking-service .
+        run: |
+          docker build -t divvly-tracking-service \
+          --build-arg MONGO_CONNECTION_STRING=$MONGO_CONNECTION_STRING \
+          --build-arg DB_USERNAME=$DB_USERNAME \
+          --build-arg DB_PASSWORD=$DB_PASSWORD \
+          --build-arg DB_NAME=$DB_NAME \
+          --build-arg DB_PORT=$DB_PORT \
+          --build-arg DB_SSLMODE=$DB_SSLMODE \
+          --build-arg DB_HOST=$DB_HOST \
+          --build-arg AFRICAS_TALKING_API_KEY=$AFRICAS_TALKING_API_KEY \
+          --build-arg AFRICAS_TALKING_USERNAME=$AFRICAS_TALKING_USERNAME \
+          --build-arg AFRICAS_TALKING_SHORT_CODE=$AFRICAS_TALKING_SHORT_CODE \
+          --build-arg GO_ENV=$GO_ENV \
+          .
 
       - name: Start the docker container
         run: docker run -d -p 8080:80 divvly-tracking-service
