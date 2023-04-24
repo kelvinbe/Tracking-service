@@ -71,7 +71,7 @@ jobs:
         run: sudo bash ./scripts/docker_cleanup.sh
 
       - name: Build the docker image
-        run: docker build -t divvly-tracking-service \
+        run: docker buildx build -t divvly-tracking-service \
           --build-arg MONGO_CONNECTION_STRING=${{ secrets.MONGO_CONNECTION_STRING }} \
           --build-arg DB_USERNAME=${{ secrets.DB_USERNAME }} \
           --build-arg DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
