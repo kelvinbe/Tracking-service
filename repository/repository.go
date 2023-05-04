@@ -15,6 +15,8 @@ import (
 	"gorm.io/gorm"
 
 	"tracking-service/websockets"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+
 )
 
 type Repository struct {
@@ -114,6 +116,7 @@ func GenerateHandlers(handlers *[]handlers.APIHandler, api *fiber.Router, db *ha
 
 func (repo *Repository) SetupRotes(app *fiber.App) {
 	app.Use(logger.New())
+	app.Use(cors.New())
 	api := app.Group("/api")
 
 	GenerateHandlers(&handlers.APIHandlers, &api, &handlers.APP_CLIENTS{
