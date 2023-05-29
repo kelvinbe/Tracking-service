@@ -73,9 +73,6 @@ jobs:
       - name: Clean up docker
         run: sudo bash ./scripts/docker_cleanup.sh
 
-      - name: Docker system prune
-        run: sudo docker system prune -a -f
-
       - name: Build the docker image
         run: |
           docker build -t divvly-tracking-service \
