@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"tracking-service/dto"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/gofiber/fiber/v2"
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
@@ -34,6 +35,7 @@ func DeactivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 	}
 
 	if err != nil {
+		sentry.CaptureException(err)
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
 			"message": "Error while fetching inactive reservations",
 			"status":  "error",
@@ -43,6 +45,7 @@ func DeactivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 	err = json.Unmarshal([]byte(*results), &inactive_reservations)
 
 	if err != nil {
+		sentry.CaptureException(err)
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
 			"message": "Error while parsing inactive reservations",
 			"status":  "error",
@@ -60,6 +63,7 @@ func DeactivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 		}).Decode(&trackingDevice)
 
 		if err != nil {
+			sentry.CaptureException(err)
 			// unlike activate if we don't get the tracking device we just skip it
 			loop_errors = append(loop_errors, err)
 			continue
@@ -71,6 +75,7 @@ func DeactivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 			err := app_clients.Aft.DeactivateDevice(trackingDevice.TrackingDeviceId)
 
 			if err != nil {
+				sentry.CaptureException(err)
 				// will try again on the next request so we just skip it
 				loop_errors = append(loop_errors, err)
 				continue
@@ -101,6 +106,7 @@ func DeactivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 				})
 
 				if err != nil {
+					sentry.CaptureException(err)
 					// will try again on the next request so we just skip it
 					loop_errors = append(loop_errors, err)
 					continue
@@ -108,6 +114,7 @@ func DeactivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 			}
 
 			if err != nil {
+				sentry.CaptureException(err)
 				// will try again on the next request so we just skip it
 				loop_errors = append(loop_errors, err)
 				continue

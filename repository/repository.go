@@ -8,6 +8,7 @@ import (
 	"tracking-service/handlers"
 	"tracking-service/storage"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/websocket/v2"
@@ -15,8 +16,8 @@ import (
 	"gorm.io/gorm"
 
 	"tracking-service/websockets"
-	"github.com/gofiber/fiber/v2/middleware/cors"
 
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 type Repository struct {
@@ -31,12 +32,14 @@ func InitRepository() *Repository {
 	client, err := storage.NewMonongoClient()
 
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Fatalf("Error connecting to mongo database: %s", err.Error())
 	}
 
 	err = client.Connect(context.Background())
 
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Fatalf("Error connecting to mongo database: %s", err.Error())
 	}
 
@@ -52,12 +55,14 @@ func InitRepository() *Repository {
 	})
 
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Fatalf("Error connecting to postgres database: %s", err.Error())
 	}
 
 	aft_client, err := aft.NewAftClient()
 
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Fatalf("Error initializing AFT client: %s", err.Error())
 	}
 

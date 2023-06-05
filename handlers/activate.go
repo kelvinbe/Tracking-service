@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"tracking-service/dto"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/gofiber/fiber/v2"
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
@@ -38,6 +39,7 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 	}
 
 	if err != nil {
+		sentry.CaptureException(err)
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
 			"message": "Error while fetching active reservations",
 			"status":  "error",
@@ -56,6 +58,7 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 	log.Printf("activeReservations: %v", *activeReservations)
 
 	if err != nil {
+		sentry.CaptureException(err)
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
 			"message": "Error while parsing active reservations",
 			"status":  "error",
@@ -73,6 +76,7 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 		}).Decode(&trackingDevice)
 
 		if err != nil {
+			sentry.CaptureException(err)
 			if err == mongo.ErrNoDocuments {
 				var newTrackingDevice = dto.TrackingDevice{
 					TrackingDeviceId: reservation.TrackingDeviceId,
@@ -82,6 +86,7 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 				_, err = app_clients.Mongo.Collection("tracking").InsertOne(context.TODO(), newTrackingDevice)
 
 				if err != nil {
+					sentry.CaptureException(err)
 					loop_errors = append(loop_errors, err)
 					// continue to the next active reservation
 					continue
@@ -104,6 +109,7 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 				})
 
 				if err != nil {
+					sentry.CaptureException(err)
 					loop_errors = append(loop_errors, err)
 					continue
 				}
@@ -120,6 +126,7 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 		}).Decode(&trackingDevice)
 
 		if err != nil {
+			sentry.CaptureException(err)
 			loop_errors = append(loop_errors, err)
 			continue
 		}
@@ -147,6 +154,7 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 				})
 
 				if err != nil {
+					sentry.CaptureException(err)
 					loop_errors = append(loop_errors, err)
 					continue
 				}
@@ -156,6 +164,7 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 			err = app_clients.Aft.ActivateDevice(trackingDevice.TrackingDeviceId)
 
 			if err != nil {
+				sentry.CaptureException(err)
 				loop_errors = append(loop_errors, err)
 				continue
 			}
@@ -170,6 +179,7 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 			})
 
 			if err != nil {
+				sentry.CaptureException(err)
 				loop_errors = append(loop_errors, err)
 				continue
 			}
@@ -185,6 +195,7 @@ func ActivateHandler(app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 			})
 
 			if err != nil {
+				sentry.CaptureException(err)
 				loop_errors = append(loop_errors, err)
 				continue
 			}

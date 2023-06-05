@@ -6,6 +6,7 @@ import (
 	"time"
 	"tracking-service/dto"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/gofiber/websocket/v2"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -13,6 +14,7 @@ import (
 func UserLocationPublish(app_clients *APP_CLIENTS, ws *websocket.Conn) interface{} {
 	defer func() {
 		if err := ws.Close(); err != nil {
+			sentry.CaptureException(err)
 			log.Printf("Failed to close websocket connection: %v", err)
 		}
 	}()
@@ -22,6 +24,7 @@ func UserLocationPublish(app_clients *APP_CLIENTS, ws *websocket.Conn) interface
 		user_location_info := &dto.IncomingUserLocationInfo{}
 
 		err := ws.ReadJSON(user_location_info); if err != nil {
+			sentry.CaptureException(err)
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("Websocket error: %v", err)
 			}
@@ -39,6 +42,7 @@ func UserLocationPublish(app_clients *APP_CLIENTS, ws *websocket.Conn) interface
 		})
 
 		if err != nil {
+			sentry.CaptureException(err)
 			log.Printf("An error occured while inserting user location: %v", err)
 			ws.WriteMessage(websocket.TextMessage, []byte("ERROR"))
 			continue
