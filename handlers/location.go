@@ -9,6 +9,7 @@ import (
 
 	"tracking-service/utils"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/gofiber/fiber/v2"
 	"github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,6 +27,7 @@ func LocationWebhookHandler (app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 	ctx.SendStatus(http.StatusOK)
 
 	if err != nil {
+		sentry.CaptureException(err)
 		// TODO: add a logger like sentry
 		log.Printf("Error while parsing incoming message: %v", err)
 		return err
@@ -52,6 +54,7 @@ func LocationWebhookHandler (app_clients *APP_CLIENTS, ctx *fiber.Ctx) error {
 	}).Err()
 
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Printf("Error while updating location: %v", err)
 		return err
 	}

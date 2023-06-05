@@ -7,6 +7,7 @@ import (
 
 	"tracking-service/dto"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -51,7 +52,7 @@ func PollingHandler (app_client *APP_CLIENTS, ctx *fiber.Ctx) error {
 	})).Decode(&locations)
 
 	if err != nil {
-
+		sentry.CaptureException(err)
 		if (err == mongo.ErrNoDocuments) {
 			return ctx.Status(http.StatusNotFound).JSON(&fiber.Map{
 				"message": "No locations found",

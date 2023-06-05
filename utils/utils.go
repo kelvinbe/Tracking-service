@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/joho/godotenv"
 )
 
@@ -23,6 +24,7 @@ func LoadEnv() {
 	if env == "" {
 		err := godotenv.Load(".env")
 		if err != nil {
+			sentry.CaptureException(err)
 			log.Fatal("Error loading .env file in development mode")
 		}
 	}

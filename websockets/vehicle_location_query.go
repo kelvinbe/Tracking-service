@@ -7,6 +7,7 @@ import (
 
 	"tracking-service/dto"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/gofiber/websocket/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -16,6 +17,7 @@ func VehicleLocationQuery(app_clients *APP_CLIENTS, ws *websocket.Conn) interfac
 	log.Printf("Vehicle location query websocket connected")
 	defer func() {
 		if err := ws.Close(); err != nil {
+			sentry.CaptureException(err)
 			log.Printf("Failed to close websocket connection: %v", err)
 		}
 	}()
@@ -30,6 +32,7 @@ func VehicleLocationQuery(app_clients *APP_CLIENTS, ws *websocket.Conn) interfac
 		vehicle_location_info := &dto.IncomingVehicleLocationInfo{}
 	
 		err := ws.ReadJSON(vehicle_location_info); if err != nil {
+			sentry.CaptureException(err)
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("Websocket error: %v", err)
 			}
@@ -47,7 +50,7 @@ func VehicleLocationQuery(app_clients *APP_CLIENTS, ws *websocket.Conn) interfac
 				})
 
 				if err != nil {
-
+					sentry.CaptureException(err)
 					if (err == mongo.ErrNoDocuments) {
 						return ws.WriteJSON(bson.M{
 							"message": "No locations found for the ID provided",
@@ -68,6 +71,7 @@ func VehicleLocationQuery(app_clients *APP_CLIENTS, ws *websocket.Conn) interfac
 
 
 				err = cursor.All(context.TODO(), &locations); if err != nil {
+					sentry.CaptureException(err)
 					ws.WriteJSON(bson.M{
 						"message": "No locations found",
 						"status": "error",
