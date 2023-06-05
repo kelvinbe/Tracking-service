@@ -50,7 +50,7 @@ func VehicleLocationQuery(app_clients *APP_CLIENTS, ws *websocket.Conn) interfac
 				})
 
 				if err != nil {
-					sentry.CaptureException(err)
+
 					if (err == mongo.ErrNoDocuments) {
 						return ws.WriteJSON(bson.M{
 							"message": "No locations found for the ID provided",
@@ -58,7 +58,7 @@ func VehicleLocationQuery(app_clients *APP_CLIENTS, ws *websocket.Conn) interfac
 							"data": nil,
 						})
 					}
-
+					sentry.CaptureException(err)
 					ws.WriteJSON(bson.M{
 						"message": "No locations found",
 						"status": "error",

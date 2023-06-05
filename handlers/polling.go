@@ -50,15 +50,15 @@ func PollingHandler (app_client *APP_CLIENTS, ctx *fiber.Ctx) error {
 		
 		
 	})).Decode(&locations)
-
 	if err != nil {
-		sentry.CaptureException(err)
+
 		if (err == mongo.ErrNoDocuments) {
 			return ctx.Status(http.StatusNotFound).JSON(&fiber.Map{
 				"message": "No locations found",
 				"status":  "error",
 			})
 		}
+		sentry.CaptureException(err)
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
 			"message": "Error while fetching locations",
 			"status":  "error",
