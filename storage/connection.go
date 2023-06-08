@@ -34,15 +34,19 @@ func NewMonongoClient() (*mongo.Client, error) {
 	if lo.IsEmpty(connection_string) {
 		return nil, errors.New("MONGO_CONNECTION_STRING is not set")
 	}
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	opts :=  options.Client().ApplyURI(connection_string).SetServerAPIOptions(serverAPI)
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(connection_string))
+	client, err := mongo.NewClient(opts)
 
 	if err != nil {
+		fmt.Println("Error creating mongo client", err)
 		return nil, err
 	}
 
 
 	if err != nil {
+		fmt.Println("Error connecting to mongo database", err)
 		return nil, err
 	}
 

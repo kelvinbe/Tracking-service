@@ -23,7 +23,7 @@ func LoadEnv() {
 	if env == "" {
 		err := godotenv.Load(".env")
 		if err != nil {
-			log.Fatal("Error loading .env file in development mode")
+			log.Fatal("Error loading .env file in development mode", err)
 		}
 	}
 	// if production do nothin, env will be readily available via os.Getenv
