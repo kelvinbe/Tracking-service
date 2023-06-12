@@ -26,6 +26,8 @@ jobs:
       AFRICAS_TALKING_USERNAME: ${{ secrets.AFRICAS_TALKING_USERNAME }}
       AFRICAS_TALKING_SHORT_CODE: ${{ secrets.AFRICAS_TALKING_SHORT_CODE }}
       GO_ENV: ${{ secrets.GO_ENV }}
+      SENTRY_ENV: ${{ secrets.SENTRY_ENV }}
+      SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
 
     steps:
       - name: Checkout code
@@ -64,6 +66,8 @@ jobs:
       AFRICAS_TALKING_USERNAME: ${{ secrets.AFRICAS_TALKING_USERNAME }}
       AFRICAS_TALKING_SHORT_CODE: ${{ secrets.AFRICAS_TALKING_SHORT_CODE }}
       GO_ENV: ${{ secrets.GO_ENV }}
+      SENTRY_ENV: ${{ secrets.SENTRY_ENV }}
+      SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
 
 
     steps:

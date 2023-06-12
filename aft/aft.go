@@ -11,6 +11,7 @@ import (
 	"os"
 	"tracking-service/utils"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/samber/lo"
 )
 
@@ -53,6 +54,7 @@ func (aft *AftClient) ActivateDevice(device_id string) error {
 	req, err := http.NewRequest(http.MethodPost, utils.AFRICAS_TALKING_SEND_URL, bytes.NewBufferString(encodedData))
 
 	if err != nil {
+		sentry.CaptureException(err)
 		return err
 	}
 
@@ -69,6 +71,7 @@ func (aft *AftClient) ActivateDevice(device_id string) error {
 	}
 
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Printf("Error sending message: %v", err)
 		return err 
 	}
@@ -77,6 +80,7 @@ func (aft *AftClient) ActivateDevice(device_id string) error {
 
 
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Printf("Error reading response: %v", err)
 		return err
 	}
@@ -102,6 +106,7 @@ func (aft *AftClient) DeactivateDevice(device_id string) error {
 	req, err := http.NewRequest(http.MethodPost, utils.AFRICAS_TALKING_SEND_URL, bytes.NewBufferString(encodedData))
 
 	if err != nil {
+		sentry.CaptureException(err)
 		return err
 	}
 
@@ -118,6 +123,7 @@ func (aft *AftClient) DeactivateDevice(device_id string) error {
 	}
 
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Printf("Error sending message: %v", err)
 		return err 
 	}
@@ -125,6 +131,7 @@ func (aft *AftClient) DeactivateDevice(device_id string) error {
 	respBody, err := io.ReadAll(res.Body)
 
 	if err != nil {
+		sentry.CaptureException(err)
 		log.Printf("Error reading response: %v", err)
 		return err
 	}

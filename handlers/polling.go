@@ -7,6 +7,7 @@ import (
 
 	"tracking-service/dto"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -49,7 +50,6 @@ func PollingHandler (app_client *APP_CLIENTS, ctx *fiber.Ctx) error {
 		
 		
 	})).Decode(&locations)
-
 	if err != nil {
 
 		if (err == mongo.ErrNoDocuments) {
@@ -58,6 +58,7 @@ func PollingHandler (app_client *APP_CLIENTS, ctx *fiber.Ctx) error {
 				"status":  "error",
 			})
 		}
+		sentry.CaptureException(err)
 		return ctx.Status(http.StatusInternalServerError).JSON(&fiber.Map{
 			"message": "Error while fetching locations",
 			"status":  "error",

@@ -22,8 +22,10 @@ require (
 	github.com/fasthttp/websocket v1.5.2 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
+	github.com/gavv/httpexpect/v2 v2.15.0 // indirect
+	github.com/getsentry/sentry-go v0.21.0 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/golang/snappy v0.0.1 // indirect
+	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect

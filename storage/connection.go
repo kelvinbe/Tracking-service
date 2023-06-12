@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/getsentry/sentry-go"
 	lo "github.com/samber/lo"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -40,13 +41,13 @@ func NewMonongoClient() (*mongo.Client, error) {
 	client, err := mongo.NewClient(opts)
 
 	if err != nil {
-		fmt.Println("Error creating mongo client", err)
+		sentry.CaptureException(err)
 		return nil, err
 	}
 
 
 	if err != nil {
-		fmt.Println("Error connecting to mongo database", err)
+		sentry.CaptureException(err)
 		return nil, err
 	}
 
@@ -61,6 +62,7 @@ func NewPostgressClient(config PostgressConfig) (*gorm.DB, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 
 	if err != nil {
+		sentry.CaptureException(err)
 		return nil, err
 	}
 
