@@ -35,8 +35,10 @@ func NewMonongoClient() (*mongo.Client, error) {
 	if lo.IsEmpty(connection_string) {
 		return nil, errors.New("MONGO_CONNECTION_STRING is not set")
 	}
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	opts :=  options.Client().ApplyURI(connection_string).SetServerAPIOptions(serverAPI)
 
-	client, err := mongo.NewClient(options.Client().ApplyURI(connection_string))
+	client, err := mongo.NewClient(opts)
 
 	if err != nil {
 		sentry.CaptureException(err)

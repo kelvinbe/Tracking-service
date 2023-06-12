@@ -36,7 +36,7 @@ func Setup () (*SeedDataIds, error) {
 	// create markets
 	err := repo.Postgres.Exec(fmt.Sprintf(`
 		insert into "public"."Market" (id,country, name, currency)
-		values ('%s','Kenya', 'Nairobi', 'KES');
+		values ('%s','Kenya-testing-tracking-service', 'Nairobi-testing-tracking-service', 'KES');
 	`, ken_id)).Error; if err != nil {
 		return nil, err
 	}
@@ -46,7 +46,7 @@ func Setup () (*SeedDataIds, error) {
 	// create submarkets
 	err = repo.Postgres.Exec(fmt.Sprintf(`
 		insert into "public"."SubMarket" (id,market_id, name)
-		values ('%s','%s', 'Nairobi');
+		values ('%s','%s', 'Nairobi-testing-tracking-service');
 	`, ken_nai_id, ken_id)).Error; if err != nil {
 		return nil, err
 	}

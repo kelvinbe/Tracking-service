@@ -1,35 +1,24 @@
 #!/bin/bash
 
-# Get the list of running container IDs
-container_ids=$(docker ps -q)
+# Get the list of running container IDs from image 'divvly-tracking-service'
+container_ids=$(sudo docker ps -a -q -f ancestor=divvly-tracking-service)
 
-# Get list of any stopped containers
-stopped_containers=$(docker ps -a -q)
-
-# Check if there are any stopped containers
-if [ -n "$stopped_containers" ]; then
-    echo "Removing stopped containers..."
-    docker rm $stopped_containers
-else
-    echo "No stopped containers found."
-fi
-
-# Check if there are any running containers
+# Check if there are any containers from 'divvly-tracking-service'
 if [ -n "$container_ids" ]; then
-    echo "Stopping running containers..."
-    docker stop $container_ids
-    docker rm $container_ids
+    echo "Stopping and removing containers from image 'divvly-tracking-service'..."
+    sudo docker stop $container_ids
+    sudo docker rm $container_ids
 else
-    echo "No running containers found."
+    echo "No containers from image 'divvly-tracking-service' found."
 fi
 
-# Check for any images
-image_ids=$(docker images -q)
+# Get the image ID of 'divvly-tracking-service'
+image_id=$(sudo docker images -q divvly-tracking-service)
 
-# Check if there are any images
-if [ -n "$image_ids" ]; then
-    echo "Removing images..."
-    docker rmi $image_ids
+# Check if the image 'divvly-tracking-service' exists
+if [ -n "$image_id" ]; then
+    echo "Removing image 'divvly-tracking-service'..."
+    sudo docker rmi $image_id
 else
-    echo "No images found."
+    echo "Image 'divvly-tracking-service' not found."
 fi
