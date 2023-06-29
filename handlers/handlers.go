@@ -32,7 +32,7 @@ func Ping(db *APP_CLIENTS, ctx *fiber.Ctx) error {
 
 var APIHandlers []APIHandler = []APIHandler{
 	{
-		Route:   "/ping",
+		Route:   "/health",
 		Handler: Ping,
 		Method:  http.MethodGet,
 	},
