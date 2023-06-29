@@ -62,13 +62,16 @@ jobs:
       GO_ENV: ${{ secrets.GO_ENV }}
       SENTRY_ENV: ${{ secrets.SENTRY_ENV }}
       SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
+      AWS_REGION: us-east-1
+      ECR_REPOSITORY: tracking-service
+      CONTAINER_NAME: tracking-service-production
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Clean up docker
-        run: sudo bash ./scripts/docker_cleanup.sh
+      # - name: Clean up docker
+      #   run: sudo bash ./scripts/docker_cleanup.sh
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@0e613a0980cbf65ed5b322eb7a1e075d28913a83
         with:
@@ -85,7 +88,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: latest
         run: |
-          docker build -t divvly-tracking-service \
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
           --build-arg MONGO_CONNECTION_STRING=$MONGO_CONNECTION_STRING \
           --build-arg DB_USERNAME=$DB_USERNAME \
           --build-arg DB_PASSWORD=$DB_PASSWORD \
