@@ -1,0 +1,105 @@
+name: Divvly Tracking Service Production
+
+on:
+  push:
+    branches:
+      - main-mobile-tracking
+
+jobs:
+  test_handlers:
+    if: true
+    runs-on: self-hosted
+    env:
+      MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_SSLMODE: ${{ secrets.DB_SSLMODE }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      AFRICAS_TALKING_API_KEY: ${{ secrets.AFRICAS_TALKING_API_KEY }}
+      AFRICAS_TALKING_USERNAME: ${{ secrets.AFRICAS_TALKING_USERNAME }}
+      AFRICAS_TALKING_SHORT_CODE: ${{ secrets.AFRICAS_TALKING_SHORT_CODE }}
+      GO_ENV: ${{ secrets.GO_ENV }}
+      SENTRY_ENV: ${{ secrets.SENTRY_ENV }}
+      SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install golang
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.20.2
+
+      - name: Install dependencies
+        run: go mod download
+
+      - name: Build code
+        run: go build -o divvly-tracking-service
+
+      - name: Run server
+        run: ./divvly-tracking-service & sleep 10
+
+      - name: Run tests
+        run: go test -v -timeout 300s ./tests
+
+  deploy:
+    runs-on: self-hosted
+    if: true
+    env:
+      MONGO_CONNECTION_STRING: ${{ secrets.MONGO_CONNECTION_STRING }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_SSLMODE: ${{ secrets.DB_SSLMODE }}
+      DB_HOST: ${{ secrets.DB_HOST }}
+      AFRICAS_TALKING_API_KEY: ${{ secrets.AFRICAS_TALKING_API_KEY }}
+      AFRICAS_TALKING_USERNAME: ${{ secrets.AFRICAS_TALKING_USERNAME }}
+      AFRICAS_TALKING_SHORT_CODE: ${{ secrets.AFRICAS_TALKING_SHORT_CODE }}
+      GO_ENV: ${{ secrets.GO_ENV }}
+      SENTRY_ENV: ${{ secrets.SENTRY_ENV }}
+      SENTRY_DNS: ${{ secrets.SENTRY_DNS }}
+      AWS_REGION: us-east-1
+      ECR_REPOSITORY: tracking-service
+      CONTAINER_NAME: tracking-service-production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # - name: Clean up docker
+      #   run: sudo bash ./scripts/docker_cleanup.sh
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@0e613a0980cbf65ed5b322eb7a1e075d28913a83
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@62f4f872db3836360b72999f4b87f1ff13310f3a
+
+      - name: Buid, tag and push the docker image to ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+          --build-arg MONGO_CONNECTION_STRING=$MONGO_CONNECTION_STRING \
+          --build-arg DB_USERNAME=$DB_USERNAME \
+          --build-arg DB_PASSWORD=$DB_PASSWORD \
+          --build-arg DB_NAME=$DB_NAME \
+          --build-arg DB_PORT=$DB_PORT \
+          --build-arg DB_SSLMODE=$DB_SSLMODE \
+          --build-arg DB_HOST=$DB_HOST \
+          --build-arg AFRICAS_TALKING_API_KEY=$AFRICAS_TALKING_API_KEY \
+          --build-arg AFRICAS_TALKING_USERNAME=$AFRICAS_TALKING_USERNAME \
+          --build-arg AFRICAS_TALKING_SHORT_CODE=$AFRICAS_TALKING_SHORT_CODE \
+          --build-arg GO_ENV=$GO_ENV \
+          .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
